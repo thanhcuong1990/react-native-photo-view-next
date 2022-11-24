@@ -1,5 +1,26 @@
-# react-native-photo-view-next
+<h1 align="center">
+  <a href="https://github.com/thanhcuong1990/react-native-photo-view-next">
+    View and Zoom images for React Native
+  </a>
+</h1>
 
+<p align="center">
+  <a href="https://github.com/thanhcuong1990/react-native-photo-view-next/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="React Native SDWebImage is released under the MIT license." />
+  </a>
+  <a href="https://www.npmjs.com/package/react-native-photo-view-next">
+    <img src="https://badge.fury.io/js/react-native-photo-view-next.svg" alt="Current npm package version." />
+  </a>
+    <a href="https://npm.im/react-native-photo-view-next">
+    <img src="https://img.shields.io/npm/dm/react-native-photo-view-next.svg" alt="Current npm package download in last month." />
+  </a>
+  <a href="https://github.com/thanhcuong1990/react-native-photo-view-next/pulls">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome!" />
+  </a>
+</p>
+
+
+This project is the next generate of [react-native-photo-view](https://github.com/alwx/react-native-photo-view).
 Provides custom Image view for React Native that allows to perform
 pinch-to-zoom on images. Works on both iOS and Android.
 
@@ -56,16 +77,3 @@ androidZoomTransitionDuration | int | **Android only**: Double-tap zoom transiti
 | onTap | func | Callback function (called on image tap) |
 | onViewTap | func | Callback function (called on tap outside of image) |
 | onScale | func | Callback function |
-
-## Compared to [react-native-image-zoom](https://github.com/Anthonyzou/react-native-image-zoom)
-
-react-native-image-zoom functionality is similar, but there are several major differencies:
-
-* PhotoView is based on PhotoDraweeView which is the "PhotoView For Fresco". It works better, it supports several
-important callbacks out-of-box and it is, actually, recommended by Chris Banes, because his
-[PhotoView](https://github.com/chrisbanes/PhotoView) (base for react-native-image-zoom) doesn't completely
-support Facebook Fresco;
-* PhotoView has more options like fadeDuration and minimumZoomScale/maximumZoomScale and more important callbacks;
-* PhotoView is written in the same manner as default React Image, and it supports most of the
-features Image has (the goal is to be fully compaitable with Image and support absolutely everything);
-* It is possible to use PhotoView as a container (currently iOS only)!
