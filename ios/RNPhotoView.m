@@ -9,8 +9,6 @@
 #import <React/RCTImageLoader.h>
 #import <SDWebImage/SDAnimatedImageView+WebCache.h>
 #import <SDWebImage/SDWebImageDownloader.h>
-#import <SDWebImage/SDWebImage.h>
-#import <SDWebImagePhotosPlugin/SDImagePhotosLoader.h>
 
 @interface RNPhotoView()
 
@@ -417,9 +415,6 @@
 - (void)initView {
     _minZoomScale = 1.0;
     _maxZoomScale = 5.0;
-
-    [SDImageLoadersManager.sharedManager addLoader:SDImagePhotosLoader.sharedLoader];
-    SDWebImageManager.defaultImageLoader = SDImageLoadersManager.sharedManager;
 
     // Setup
     self.backgroundColor = [UIColor clearColor];
