@@ -1,0 +1,34 @@
+{
+  "name": "react-native-photo-view-next",
+  "version": "1.5.3",
+  "description": "Displaying photos with pinch-to-zoom",
+  "main": "index.js",
+  "author": {
+    "name": "Cuong Lam",
+    "email": "thanhcuong1990@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "react-native",
+    "react-component",
+    "ios",
+    "android",
+    "gallery",
+    "lightbox",
+    "pinch",
+    "pinch-to-zoom",
+    "mobile"
+  ],
+  "homepage": "https://github.com/thanhcuong1990/react-native-photo-view-next",
+  "bugs": {
+    "url": "https://github.com/thanhcuong1990/react-native-photo-view-next/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thanhcuong1990/react-native-photo-view-next.git"
+  },
+  "peerDependencies": {
+    "deprecated-react-native-prop-types": "*",
+    "prop-types": "*"
+  }
+}
