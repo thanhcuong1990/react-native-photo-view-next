@@ -14,7 +14,7 @@
 
 #pragma mark - View
 
-@property (nonatomic, strong) MWTapDetectingImageView *photoImageView;
+@property (nonatomic, strong) SDAnimatedImageView *photoImageView;
 @property (nonatomic, strong) MWTapDetectingView *tapView;
 @property (nonatomic, strong) UIImageView *loadingImageView;
 
@@ -102,7 +102,8 @@
 }
 
 - (void)imageView:(UIImageView *)imageView doubleTapDetected:(UITouch *)touch {
-    [self handleDoubleTap:[touch locationInView:imageView]];
+    CGPoint touchPoint = [touch locationInView:imageView];
+    [self handleDoubleTapAtPoint:touchPoint];
 }
 
 #pragma mark - MWTapDetectingViewDelegate
@@ -124,7 +125,7 @@
                     @"y": @(touchY),
             },
             @"target": self.reactTag,
-                              });
+                            });
     }
 }
 
@@ -136,7 +137,7 @@
     touchY *= 1/self.zoomScale;
     touchX += self.contentOffset.x;
     touchY += self.contentOffset.y;
-    [self handleDoubleTap:CGPointMake(touchX, touchY)];
+    [self handleDoubleTapAtPoint:CGPointMake(touchX, touchY)];
 }
 
 #pragma mark - Setup
@@ -412,6 +413,34 @@
 
 #pragma mark - Private
 
+- (void)handleSingleTap:(UITapGestureRecognizer *)gesture {
+    CGPoint touchPoint = [gesture locationInView:_photoImageView];
+
+    if (_onPhotoViewerTap) {
+        _onPhotoViewerTap(@{
+            @"point": @{
+                @"x": @(touchPoint.x),
+                @"y": @(touchPoint.y),
+            },
+            @"target": self.reactTag
+        });
+    }
+}
+
+- (void)handleDoubleTapAtPoint:(CGPoint)touchPoint {
+    // Zoom logic
+    if (self.zoomScale != self.minimumZoomScale && self.zoomScale != [self initialZoomScaleWithMinScale]) {
+        // Zoom out
+        [self setZoomScale:self.minimumZoomScale animated:YES];
+    } else {
+        // Zoom in to twice the size
+        CGFloat newZoomScale = ((self.maximumZoomScale + self.minimumZoomScale) / 2);
+        CGFloat xsize = self.bounds.size.width / newZoomScale;
+        CGFloat ysize = self.bounds.size.height / newZoomScale;
+        [self zoomToRect:CGRectMake(touchPoint.x - xsize/2, touchPoint.y - ysize/2, xsize, ysize) animated:YES];
+    }
+}
+
 - (void)initView {
     _minZoomScale = 1.0;
     _maxZoomScale = 5.0;
@@ -431,11 +460,26 @@
     [self addSubview:_tapView];
 
     // Image view
-    _photoImageView = [[MWTapDetectingImageView alloc] initWithFrame:self.bounds];
+    _photoImageView = [[SDAnimatedImageView alloc] initWithFrame:self.bounds];
     _photoImageView.backgroundColor = [UIColor clearColor];
     _photoImageView.contentMode = UIViewContentModeCenter;
-    _photoImageView.tapDelegate = self;
     [self addSubview:_photoImageView];
+
+    // Add single tap gesture recognizer
+    UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
+    singleTap.numberOfTapsRequired = 1;
+    [_photoImageView addGestureRecognizer:singleTap];
+
+    // Add double tap gesture recognizer
+    UITapGestureRecognizer *doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
+    doubleTap.numberOfTapsRequired = 2;
+    [_photoImageView addGestureRecognizer:doubleTap];
+
+    // Ensure single tap waits for double tap to fail
+    [singleTap requireGestureRecognizerToFail:doubleTap];
+
+    // Enable user interaction on the image view
+    _photoImageView.userInteractionEnabled = YES;
 }
 
 @end

@@ -9,12 +9,12 @@ Pod::Spec.new do |s|
   s.author       = package['author']
   s.homepage     = package['homepage']
   s.license      = package['license']
-  s.ios.deployment_target = '12.0'
-  s.tvos.deployment_target = '12.0'
+  s.ios.deployment_target = '13.4'
+  s.tvos.deployment_target = '13.4'
   s.source       = { git: 'https://github.com/thanhcuong1990/react-native-photo-view-next.git', tag: "v#{s.version}" }
   s.source_files = 'ios/*.{h,m}'
   s.dependency 'React-Core'
-  s.dependency 'SDWebImage'
+  s.dependency 'SDWebImage', '~> 5.18.7'
   s.dependency 'SDWebImageWebPCoder'
   s.dependency 'SDWebImagePhotosPlugin'
 end
