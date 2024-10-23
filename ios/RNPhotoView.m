@@ -137,7 +137,7 @@
     touchY *= 1/self.zoomScale;
     touchX += self.contentOffset.x;
     touchY += self.contentOffset.y;
-    [self handleDoubleTapAtPoint:CGPointMake(touchX, touchY)]
+    [self handleDoubleTapAtPoint:CGPointMake(touchX, touchY)];
 }
 
 #pragma mark - Setup
