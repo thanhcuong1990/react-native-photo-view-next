@@ -1,5 +1,6 @@
 #import "RNPhotoView.h"
 
+#import <QuartzCore/QuartzCore.h>
 #import <React/RCTBridge.h>
 #import <React/RCTConvert.h>
 #import <React/RCTEventDispatcher.h>
@@ -18,6 +19,12 @@
 @property (nonatomic, strong) MWTapDetectingView *tapView;
 @property (nonatomic, strong) UIImageView *loadingImageView;
 
+
+@property (nonatomic, strong) CADisplayLink *displayLink;
+@property (nonatomic) NSUInteger currentFrameIndex;
+@property (nonatomic, strong) NSArray<UIImage *> *animationFrames;
+@property (nonatomic) NSTimeInterval frameDuration;
+
 #pragma mark - Data
 
 @property (nonatomic, strong) UIImage *image;
@@ -35,6 +42,7 @@
     if ((self = [super init])) {
         _bridge = bridge;
         [self initView];
+        [self setupDisplayLink];
     }
     return self;
 }
@@ -270,9 +278,16 @@
         self.contentSize = CGSizeMake(0, 0);
 
         // Set image
-        _photoImageView.image = image;
+        if ([image isKindOfClass:[UIImage class]] && [image.images count] > 0) {
+            self.animationFrames = image.images;
+            self.frameDuration = (image.duration / image.images.count) * 5; // Slow down by 5 times
+
+            self.currentFrameIndex = 0;
+            _photoImageView.image = self.animationFrames[self.currentFrameIndex];
+        } else {
+            _photoImageView.image = image;
+        }
         _photoImageView.hidden = NO;
-        _photoImageView.playbackRate = 0.2f;
         
         // Setup photo frame
         CGRect photoImageViewFrame;
@@ -441,6 +456,30 @@
 
     // Enable user interaction on the image view
     _photoImageView.userInteractionEnabled = YES;
+}
+
+#pragma mark - Setup Display Link
+
+- (void)updateFrame {
+    if (!self.animationFrames || self.animationFrames.count == 0) return;
+
+    NSUInteger frameCount = self.animationFrames.count;
+    NSTimeInterval totalAnimationTime = frameCount * self.frameDuration;
+    NSTimeInterval elapsed = fmod(CACurrentMediaTime(), totalAnimationTime);
+
+    self.currentFrameIndex = (NSUInteger)(elapsed / self.frameDuration) % frameCount;
+    self.photoImageView.image = self.animationFrames[self.currentFrameIndex];
+}
+
+- (void)setupDisplayLink {
+    self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(updateFrame)];
+    self.displayLink.preferredFramesPerSecond = 60; // Adjust based on desired speed
+    [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+}
+
+- (void)dealloc {
+    [self.displayLink invalidate];
+    self.displayLink = nil;
 }
 
 @end
