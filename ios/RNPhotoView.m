@@ -290,87 +290,47 @@
 #pragma mark - Setter
 
 - (void)setSource:(NSDictionary *)source {
-    __weak RNPhotoView *weakSelf = self;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if ([weakSelf.source isEqualToDictionary:source]) {
+    if ([_source isEqualToDictionary:source]) return;
+    
+    _source = [source copy];
+    NSString *uri = _source[@"uri"];
+    if (!uri) return;
+
+    NSURL *imageURL = [NSURL URLWithString:uri];
+    if (![[uri substringToIndex:4] isEqualToString:@"http"]) {
+        UIImage *localImage = RCTImageFromLocalAssetURL(imageURL);
+        if (localImage) {
+            [self setImage:localImage];
             return;
         }
-        NSString *uri = source[@"uri"];
-        if (!uri) {
-            return;
-        }
-        weakSelf.source = source;
-        NSURL *imageURL = [NSURL URLWithString:uri];
-
-        if (![[uri substringToIndex:4] isEqualToString:@"http"]) {
-            @try {
-                UIImage *image = RCTImageFromLocalAssetURL(imageURL);
-                if (image) { // if local image
-                    [self setImage:image];
-                    if (weakSelf.onPhotoViewerLoad) {
-                        weakSelf.onPhotoViewerLoad(nil);
-                    }
-                    if (weakSelf.onPhotoViewerLoadEnd) {
-                        weakSelf.onPhotoViewerLoadEnd(nil);
-                    }
-                    return;
-                }
-            }
-            @catch (NSException *exception) {
-                NSLog(@"%@", exception.reason);
-            }
-        }
-
-        NSURLRequest *request = [[NSURLRequest alloc] initWithURL:imageURL];
-
-        if (source[@"headers"]) {
-            // Set headers.
-            [source[@"headers"] enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString* header, BOOL *stop) {
-                [[SDWebImageDownloader sharedDownloader] setValue:header forHTTPHeaderField:key];
-            }];
-            NSMutableURLRequest *mutableRequest = [request mutableCopy];
-
-            NSDictionary *headers = source[@"headers"];
-            NSEnumerator *enumerator = [headers keyEnumerator];
-            id key;
-            while((key = [enumerator nextObject]))
-                [mutableRequest addValue:[headers objectForKey:key] forHTTPHeaderField:key];
-            request = [mutableRequest copy];
-        }
-        if (weakSelf.onPhotoViewerLoadStart) {
-            weakSelf.onPhotoViewerLoadStart(nil);
-        }
-
-        SDWebImageOptions options = SDWebImageRetryFailed;
-        [weakSelf downloadImage:imageURL options:options];
-    });
+    }
+    
+    [self loadImageFromURL:imageURL headers:_source[@"headers"]];
 }
 
-- (void)downloadImage:(NSURL *) url options:(SDWebImageOptions) options {
-    __weak typeof(self) weakSelf = self; // Always use a weak reference to self in blocks
-    [[SDWebImageManager sharedManager] loadImageWithURL:url options:options progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
-        if (weakSelf.onPhotoViewerProgress) {
-            weakSelf.onPhotoViewerProgress(@{
-                @"loaded": @(receivedSize),
-                @"total": @(expectedSize)
-                                           });
+
+- (void)loadImageFromURL:(NSURL *)url headers:(NSDictionary *)headers {
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    if (headers) {
+        for (NSString *key in headers) {
+            [request setValue:headers[key] forHTTPHeaderField:key];
         }
-    } completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
-        if (error) {
-            if (weakSelf.onPhotoViewerError) {
-                weakSelf.onPhotoViewerError(nil);
-            }
-        } else if (image) {
+    }
+
+    __weak typeof(self) weakSelf = self;
+    [[SDWebImageManager sharedManager] loadImageWithURL:url options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
+        if (weakSelf.onPhotoViewerProgress) {
+            weakSelf.onPhotoViewerProgress(@{@"loaded": @(receivedSize), @"total": @(expectedSize)});
+        }
+    } completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        if (image) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [weakSelf setImage:image];
             });
-            if (weakSelf.onPhotoViewerLoad) {
-                weakSelf.onPhotoViewerLoad(nil);
-            }
+            if (weakSelf.onPhotoViewerLoad) weakSelf.onPhotoViewerLoad(nil);
         }
-        if (weakSelf.onPhotoViewerLoadEnd) {
-            weakSelf.onPhotoViewerLoadEnd(nil);
-        }
+        if (error && weakSelf.onPhotoViewerError) weakSelf.onPhotoViewerError(nil);
+        if (weakSelf.onPhotoViewerLoadEnd) weakSelf.onPhotoViewerLoadEnd(nil);
     }];
 }
 
