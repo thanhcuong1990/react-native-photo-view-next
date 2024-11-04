@@ -5,7 +5,7 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import androidx.annotation.NonNull;
-import android.util.Log;
+
 import android.view.View;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
@@ -13,6 +13,8 @@ import com.facebook.drawee.controller.ControllerListener;
 import com.facebook.drawee.drawable.AutoRotateDrawable;
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchy;
+import com.facebook.fresco.animation.backend.AnimationBackend;
+import com.facebook.fresco.animation.drawable.AnimatedDrawable2;
 import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
@@ -21,7 +23,6 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.common.SystemClock;
 import com.facebook.react.modules.fresco.ReactNetworkImageRequest;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
@@ -172,6 +173,12 @@ public class PhotoView extends PhotoDraweeView {
                     return;
                 }
                 update(imageInfo.getWidth(), imageInfo.getHeight());
+
+                if (animatable instanceof AnimatedDrawable2 animatedDrawable) {
+                    AnimationBackend originalBackend = animatedDrawable.getAnimationBackend();
+                    SlowAnimationBackend slowBackend = new SlowAnimationBackend(originalBackend);
+                    animatedDrawable.setAnimationBackend(slowBackend);
+                }
             }
         });
 

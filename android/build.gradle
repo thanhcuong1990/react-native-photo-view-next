@@ -38,5 +38,6 @@ dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation 'com.facebook.fresco:fresco:3.4.0'
     implementation 'com.facebook.fresco:animated-gif:3.4.0'
+    implementation 'com.facebook.fresco:animated-base:3.4.0'
     implementation 'me.relex:photodraweeview:2.1.0'
 }

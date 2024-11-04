@@ -272,7 +272,8 @@
         // Set image
         _photoImageView.image = image;
         _photoImageView.hidden = NO;
-
+        _photoImageView.playbackRate = 0.2f;
+        
         // Setup photo frame
         CGRect photoImageViewFrame;
         photoImageViewFrame.origin = CGPointZero;
