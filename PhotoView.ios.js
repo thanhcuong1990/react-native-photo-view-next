@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { requireNativeComponent, View } from 'react-native';
+import { requireNativeComponent, View, Image } from 'react-native';
 import { ViewPropTypes } from 'deprecated-react-native-prop-types'
-
-const resolveAssetSource = require('react-native/Libraries/Image/resolveAssetSource');
 
 export default class PhotoView extends Component {
     static propTypes = {
@@ -38,8 +36,8 @@ export default class PhotoView extends Component {
     };
 
     render() {
-        const source = resolveAssetSource(this.props.source);
-        var loadingIndicatorSource = resolveAssetSource(this.props.loadingIndicatorSource);
+        const source = Image.resolveAssetSource(this.props.source);
+        var loadingIndicatorSource = Image.resolveAssetSource(this.props.loadingIndicatorSource);
 
         if (source && source.uri === '') {
             console.warn('source.uri should not be an empty string');
